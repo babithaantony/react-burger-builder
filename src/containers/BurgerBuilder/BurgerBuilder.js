@@ -2,10 +2,11 @@ import React, {Component} from 'react';
 import Burger from '../../components/Burger/Burger';
 import BuildControls from '../../components/Burger/BuildControls/BuildControls';
 import OrderSummary from '../../components/Burger/BurgerOrderSummary/BurgerOrderSummary'
+import axios from '../../axios-orders';
 
 import Modal from '../../components/Modal/Modal';
 
-import Aux from '../../hoc/Aux';
+import Aux from '../../hoc/Auxi';
 
 const INGRADIENT_PRICES = {
     salad:1,
@@ -27,6 +28,8 @@ class BurgerBuilder extends Component{
         purchaseNow:false
     }
 
+    //purchase button enabled/disabled status change
+    //button gets enabled or disabled based on the 'purchasebele' value
     setPurchasble = (ingradients) => {
 
       const  sum = Object.keys(ingradients).map(igKey => {
@@ -42,6 +45,8 @@ class BurgerBuilder extends Component{
 
     }
 
+    //add ingradient/quantity from the builded burger
+    //fired on '+' button click
     addIngradientHandler = (type) =>{
         const oldCount = this.state.ingradients[type];
         const updatedCount = oldCount+1;
@@ -62,6 +67,8 @@ class BurgerBuilder extends Component{
 
     }
 
+    //remove the ingradient/quantity from the builded burger
+    //fired on '-' button click
     removeIngradientHandler = (type) =>{
 
         const oldCount = this.state.ingradients[type];
@@ -86,12 +93,15 @@ class BurgerBuilder extends Component{
         this.setPurchasble(updatedIngradients);
     }
 
+    //purchase now click event
+    
     handlePurchaseClick = () =>{
         this.setState({
             purchaseNow:true
         });
     }
 
+    //purchase close
     purchaseCloseClick = () =>{
         
         this.setState({
@@ -99,8 +109,29 @@ class BurgerBuilder extends Component{
         });
     }
 
+    //order noe clck
+    //send the data to the server
     continueCheckOut = () => {
-        alert("Continue!");
+
+        const order = {
+            ingradients: this.state.ingradients,
+            price: this.state.totalPrice,
+            customer: {
+                name: 'Babitha Antony',
+                phone: '123456',
+                address: 'test address',
+                zipcode: '1256',
+                country: 'US'
+            },
+            deliveryMethod: 'Pick Up'
+        }
+
+        axios.post('/orders.json', order)
+        .then(response => {
+            console.log(response)
+        }).catch(error => {
+            console.error(error);
+        });
     }
 
     render(){
