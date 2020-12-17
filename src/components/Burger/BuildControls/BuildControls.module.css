@@ -1,0 +1,53 @@
+.contolsController{
+    width: 100%;
+    min-height: 120px;
+    display: flex; /* or inline-flex */
+    flex-flow: row wrap;
+    align-items: center;
+    list-style: none;
+    background-color: #DD7633;
+    border-radius: 5px;
+    margin: auto;
+    padding: 20px;
+}
+
+.center{
+    margin: auto;
+    align-content: center;
+    width: 80%;
+}
+
+ul.contolsController > li {
+
+    padding: 5px;
+    margin: 10px;
+    width: 100%;
+    align-content: center;
+    flex-flow: row wrap;
+    align-items: center;
+    text-align: center;
+    
+}
+
+ul.contolsController > li:first-child {
+    font-weight: bold;    
+}
+
+
+
+li button{
+    margin: 2px;
+    background-color: #cccccc;
+    width: 20px;
+    padding: 2px;
+}
+
+ul.contolsController > li:last-child > button{
+    background-color: #E1C318;
+    border: none;
+    border-radius: 3px;
+    padding: 10px;
+    font-weight: bold;
+    width: 150px;
+    margin: auto;
+}
