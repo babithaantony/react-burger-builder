@@ -4,9 +4,11 @@ import BuildControls from '../../components/Burger/BuildControls/BuildControls';
 import OrderSummary from '../../components/Burger/BurgerOrderSummary/BurgerOrderSummary'
 import axios from '../../axios-orders';
 
-import Modal from '../../components/Modal/Modal';
+import Modal from '../../UI/Modal/Modal';
+import withErrorHandler from '../../hoc/WithErrorHandler/WithErrorHandler'
 
-import Aux from '../../hoc/Auxi';
+import Aux from '../../hoc/Auxi/Auxi';
+import Spinner from '../../UI/Spinner/Spinner'
 
 const INGRADIENT_PRICES = {
     salad:1,
@@ -25,8 +27,24 @@ class BurgerBuilder extends Component{
         },
         totalPrice: 4.50,
         purchasable: false,
-        purchaseNow:false
+        purchaseNow:false,
+        loading: false
     }
+
+    // fetch ingredients from database on 
+    // component mount
+
+    componentDidMount(){
+        axios.get("/ingredients.json")
+        .then(response =>{
+            let ingradients = response.data;
+            this.setState({
+                ingradients: ingradients
+            });
+            console.log(ingradients);
+        });
+    }
+
 
     //purchase button enabled/disabled status change
     //button gets enabled or disabled based on the 'purchasebele' value
@@ -101,7 +119,7 @@ class BurgerBuilder extends Component{
         });
     }
 
-    //purchase close
+    //Modal box close
     purchaseCloseClick = () =>{
         
         this.setState({
@@ -109,15 +127,19 @@ class BurgerBuilder extends Component{
         });
     }
 
-    //order noe clck
+    //order now click
     //send the data to the server
     continueCheckOut = () => {
+
+        this.setState({
+            loading: true
+        });
 
         const order = {
             ingradients: this.state.ingradients,
             price: this.state.totalPrice,
             customer: {
-                name: 'Babitha Antony',
+                name: 'Anju Law',
                 phone: '123456',
                 address: 'test address',
                 zipcode: '1256',
@@ -128,9 +150,9 @@ class BurgerBuilder extends Component{
 
         axios.post('/orders.json', order)
         .then(response => {
-            console.log(response)
+            this.setState({ loading: false, purchaseNow: false });
         }).catch(error => {
-            console.error(error);
+            this.setState({ loading: false, purchaseNow: false });
         });
     }
 
@@ -144,18 +166,24 @@ class BurgerBuilder extends Component{
                 disabledIngradients[key] = disabledIngradients[key] <= 0;
             }
 
+            //show loading after clicking 'Purchase Now' 
+            let orderSummary = <OrderSummary 
+                ingradients={this.state.ingradients} 
+                cancelPurchase={this.purchaseCloseClick} 
+                continueCheckOut={this.continueCheckOut}
+                totalPrice={this.state.totalPrice}/>
+            if(this.state.loading) {
+                orderSummary  = <Spinner />    
+            }
             
 
         return(
             <Aux>
                 <Modal 
                     show={this.state.purchaseNow}
-                    handleCloseClick={this.purchaseCloseClick}>
-                    <OrderSummary 
-                        ingradients={this.state.ingradients} 
-                        cancelPurchase={this.purchaseCloseClick} 
-                        continueCheckOut={this.continueCheckOut}
-                        totalPrice={this.state.totalPrice}/>
+                    handleCloseClick={this.purchaseCloseClick}
+                    showLoading={this.state.loading}>                        
+                    {orderSummary}
                 </Modal>
                 <Burger ingradients={this.state.ingradients} />
                 <BuildControls 
@@ -172,4 +200,4 @@ class BurgerBuilder extends Component{
 
 }
 
-export default BurgerBuilder;
+export default withErrorHandler(BurgerBuilder, axios);

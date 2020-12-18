@@ -1,8 +1,8 @@
 import React from 'react';
-import Aux from '../../hoc/Auxi';
+import Aux from '../Auxi/Auxi';
 import styles from './Layout.module.css';
 
-import Toolbar from '../Navigation/Toolbar/Toolbar';
+import Toolbar from '../../components/Navigation/Toolbar/Toolbar';
 
 const layout = (props) => (
     <Aux>

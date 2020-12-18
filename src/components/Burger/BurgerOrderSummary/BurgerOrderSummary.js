@@ -1,7 +1,7 @@
 import React from 'react';
 import Button from '../BuildControls/Button';
 
-import Aux from '../../../hoc/Auxi'
+import Aux from '../../../hoc/Auxi/Auxi'
 
 const orderSummary = (props) => {
 
