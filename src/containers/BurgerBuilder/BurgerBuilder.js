@@ -19,16 +19,12 @@ const INGRADIENT_PRICES = {
 class BurgerBuilder extends Component{
 
     state = {
-        ingradients: {
-            salad :0 ,
-            bacon: 0,            
-            meat:0,
-            cheese: 0
-        },
+        ingradients: null,
         totalPrice: 4.50,
         purchasable: false,
         purchaseNow:false,
-        loading: false
+        loading: false,
+        console: false
     }
 
     // fetch ingredients from database on 
@@ -36,12 +32,15 @@ class BurgerBuilder extends Component{
 
     componentDidMount(){
         axios.get("/ingredients.json")
-        .then(response =>{
-            let ingradients = response.data;
+        .then(response => {
             this.setState({
-                ingradients: ingradients
+                ingradients: response.data 
             });
-            console.log(ingradients);
+
+        }).catch(error => {
+            this.setState({
+                error: true
+            });
         });
     }
 
@@ -66,12 +65,15 @@ class BurgerBuilder extends Component{
     //add ingradient/quantity from the builded burger
     //fired on '+' button click
     addIngradientHandler = (type) =>{
+        
         const oldCount = this.state.ingradients[type];
         const updatedCount = oldCount+1;
         const updatedIngradients = {
             ...this.state.ingradients
         }
+        
         updatedIngradients[type] = updatedCount;
+        
         const priceAddition = INGRADIENT_PRICES[type];
         const oldPrice = this.state.totalPrice;
         const newPrice = oldPrice + priceAddition;
@@ -167,13 +169,33 @@ class BurgerBuilder extends Component{
             }
 
             //show loading after clicking 'Purchase Now' 
-            let orderSummary = <OrderSummary 
-                ingradients={this.state.ingradients} 
-                cancelPurchase={this.purchaseCloseClick} 
-                continueCheckOut={this.continueCheckOut}
-                totalPrice={this.state.totalPrice}/>
-            if(this.state.loading) {
-                orderSummary  = <Spinner />    
+            let orderSummary = null;
+            let burgerBuilderControls = (this.state.error) ? 'Ingradients cannot be loaded' : <Spinner />;
+            
+
+            if(this.state.ingradients !== null){
+                orderSummary = <OrderSummary 
+                    ingradients={this.state.ingradients} 
+                    cancelPurchase={this.purchaseCloseClick} 
+                    continueCheckOut={this.continueCheckOut}
+                    totalPrice={this.state.totalPrice}/>
+
+                if(this.state.loading) {
+                    orderSummary  = <Spinner />    
+                }
+
+                burgerBuilderControls = <Aux>
+                    <Burger ingradients={this.state.ingradients} />
+                    <BuildControls 
+                        ingradients={this.state.ingradients}
+                        addIngradients={this.addIngradientHandler}
+                        removeIngradients={this.removeIngradientHandler}
+                        disabled = {disabledIngradients}
+                        totalPrice={this.state.totalPrice} 
+                        purchasable={!this.state.purchasable}
+                        handlePurchaseClick={this.handlePurchaseClick} />
+                </Aux>
+
             }
             
 
@@ -185,15 +207,7 @@ class BurgerBuilder extends Component{
                     showLoading={this.state.loading}>                        
                     {orderSummary}
                 </Modal>
-                <Burger ingradients={this.state.ingradients} />
-                <BuildControls 
-                    ingradients={this.state.ingradients}
-                    addIngradients={this.addIngradientHandler}
-                    removeIngradients={this.removeIngradientHandler}
-                    disabled = {disabledIngradients}
-                    totalPrice={this.state.totalPrice} 
-                    purchasable={!this.state.purchasable}
-                    handlePurchaseClick={this.handlePurchaseClick} />
+                {burgerBuilderControls}
             </Aux>
         )
     }
